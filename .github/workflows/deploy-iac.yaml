@@ -1,0 +1,46 @@
+name: IAC Pipeline
+
+# This block specifies all branches (or other triggering events) for this workflow
+on:
+  push:
+    branches:
+      - '**'            # all branches
+      - '!release/**'   # ignores branches starting with 'release/'. Generic release workflow uses this naming             
+  pull_request:
+    branches:
+      - 'develop'       # runs when Pull Request to develop branch is created
+  workflow_dispatch:    # manual trigger for branch or tag (usually for purpose of roll back)
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false  # we cannot cancel a running job as it causes a terraform lock issue
+
+# permissions for github token
+permissions:
+  id-token: write
+  contents: read
+  attestations: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  ci-iac:
+    name: CI - IAC workflow
+    uses: merck-gen/dso-ghwf-iac/.github/workflows/ci-iac.yaml@v1
+    secrets: inherit
+    with:
+      ##### terraform
+      terraform-work-dir: "iac/tf" # REPLACE-ME with path to terraform code
+      ##### scans
+      wiz-scan-type: iac
+      wiz-iac-scan-type: "Terraform"
+ 
+  # CD workflow deploys the IaC code using Terraform to the target environments
+  # Environments and deployments are defined in .merck.yaml
+  cd:
+    name: CD - IAC workflow
+    needs: ci-iac
+    uses: merck-gen/dso-ghwf-cd/.github/workflows/cd-generic.yaml@v5
+    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+    secrets: inherit
+  

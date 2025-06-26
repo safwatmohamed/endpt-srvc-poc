@@ -1,0 +1,37 @@
+name: Release
+# Release workflow is encouraged as a mechanism to version control your application code and deploy it to the target environments
+on:
+  workflow_dispatch: # runs manually
+    inputs:
+      bump-level:
+        description: 'The level of the version to bump'
+        required: true
+        default: 'patch'
+        type: 'choice'
+        options:
+          - 'major'
+          - 'minor'
+          - 'patch'
+    
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  release:
+    name: Generic Release
+    runs-on: linux-x64-small
+    steps:
+      - name: Release
+        uses: merck-gen/dso-gha-generic-release@v1
+        with:
+          version-file: './VERSION'
+          bump-level: ${{ github.event.inputs.bump-level }}
+          release-body: 'Release notes'
+          org-release-app-secret: ${{ secrets.ORG_RELEASE_APP_SECRET }}
+          org-release-app-id: ${{ vars.ORG_RELEASE_APP_ID }}
+          update-develop-version: 'true'

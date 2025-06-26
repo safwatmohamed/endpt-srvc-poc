@@ -1,0 +1,42 @@
+ci: tft # TODO: REPLACE-ME with your Application short name (like "cflow"). You can find the short name from ServiceNow.
+
+serviceNowID: "*****"       # TODO: REPLACE-ME with ServiceNow ID of your system (e.g., BA0001234).
+isBMFApplication: false   # Flag indicating if the application is a part of BlueSky, "true" or "false"
+
+# For GitHub Actions
+deploy:
+  deployments:
+    #### Deploy prereqs ####
+    - name: terraform
+      pattern: terraform
+      terraform-work-dir: "iac/prerequisites/****" # TODO: REPLACE-ME with path to prereqs terraform code
+
+    #### Deploy IAC ####
+    - name: terraform
+      pattern: terraform
+      terraform-work-dir: iac/tf
+
+  environments:
+    #### Dev Environment Variables ####
+    - name: dev
+      variables:
+        #### AWS #### (Uncomment the following variables for AWS)
+        # AWS_ROLE_ARN: vars.AWS_ROLE_ARN
+        # AWS_DEFAULT_REGION: vars.AWS_DEFAULT_REGION
+        
+        #### Azure #### (Uncomment the following variables for Azure)
+
+        #### GCP #### (Uncomment the following variables for GCP)
+        # GCP_WORKLOAD_IDENTITY_PROVIDER: secrets.ORG_MCS_GCP_WIP_GITHUB
+        # GCP_SERVICE_ACCOUNT_EMAIL: secrets.GCP_SERVICE_ACCOUNT_EMAIL
+        # TF_VAR_deployment_service_account: secrets.GCP_DEPLOYMENT_SERVICE_ACCOUNT_EMAIL # Secret value gets passed to deployment_service_account variable at runtime
+
+    #### UAT Environment Variables ####
+    # - name: uat
+    #   variables:
+    #     env_type: uat
+
+    #### PROD Environment Variables ####
+    # - name: prod
+    #   variables:
+    #     env_type: prod
