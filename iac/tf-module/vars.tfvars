@@ -13,7 +13,6 @@ allowed_principles = [
     role        = "AnotherRole"  # Another example IAM role
   }
 ]
-
 # List of backend IPs for the service and their ports
 listeners={
   443:["10.1.0.1", "10.1.0.2", "10.1.0.3"],
@@ -35,4 +34,5 @@ default_tags = {
   Application        = "CI"
   Environment        = "Development"
   Service            = "endpoint-services"
+  managed_by         = "terraform"
 }

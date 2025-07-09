@@ -16,11 +16,6 @@ variable "listeners" {
   type        = map(list(string))
 }
 
-variable "backend_ips" {
-  type    = list(string)
-  description = ""
-}
-
 variable "port" {
   type    = number
   description = ""
