@@ -1,0 +1,136 @@
+parameters:
+  - title: Fill in parameters
+    required:
+      - ci
+      - vendor
+      - irab
+      - project_contact
+      - env
+      - region
+      - listners
+      - allowed_principles
+      
+    properties:
+      ci:
+        title: ServiceNow Business Application
+        description: Type Business Application name, shortname, or SNOW ID to search
+        ui:field: AutocompleteInput
+        ui:options:
+          resultKey: u_short_name
+          dataSources:
+            - businessApplications
+      vendor:
+        title: Vendor
+        description: Name of the vendor 
+        type: string
+      irab:
+        title: IRAB order number
+        description: IRAB approval is required as a prerequisite
+        type: string
+      project_contact:
+        title: Email contact for the project (Distribution List)
+        type: string
+        description: Email contact for the project. This should ALWAYS be a Distribution
+          List, not an individual email (even for sandbox configurations).
+        ui:autofocus: true
+      env:
+        title: Environment
+        description: Environment in which the endpoint will be deployed
+        type: string
+        default: development
+        enum:
+          - development
+          - test
+          - production
+      region:
+        title: Region
+        description: Region in which the endpoint will be deployed
+        type: string
+        default: us-east-1
+        enum:
+          - us-east-1
+          - us-east-2
+          - ap-southeast-1
+          - ap-northeast-1
+          - eu-west-1
+          - eu-central-1
+
+      listners:
+        title: Privatelink Listener
+        description: Provide the port and the backend IPs of your service
+        type: array
+        minItems: 1
+        ui:options:
+          addable: true
+          removable: true
+        items:
+          type: object
+          properties:
+            port:
+              title: Port 
+              description: Port number of your service
+              type: string
+            backend_ips:
+              title: Backend IPs 
+              description: Backend IPs for this specific port
+              type: array
+              minItems: 1
+              ui:options:
+                addable: true
+                removable: true
+              items:
+                title: IP 
+                type: string
+                         
+      allowed_principles:
+        title: Allowed Principles
+        description: The vendor should provide you with the principles that needs to
+          be allowed. Those principles are the aws roles which the vendor will assume to create
+          the endpoint from their side
+          Refer to aws docs  https://docs.aws.amazon.com/vpc/latest/privatelink/configure-endpoint-service.html#add-remove-permissions
+        type: array
+        minItems: 1
+        ui:options:
+          addable: true
+          removable: true
+        items:
+          type: object
+          properties:
+            vendor_account_id:
+              title: AWS account number 
+              description: AWS account number of the vendor where they will create the endpoint at their side
+              type: string
+            vendor_role:
+              title: Role 
+              description: Role assumed by the vendor to create the endpoint 
+              type: string
+
+steps:
+  - id: fetch-base
+    name: Fetch vars.tfvars skeleton
+    action: fetch:template
+    input:
+      replace: true
+      url: ./../skeleton/vars.tfvars
+      values:
+        ci: ${{ parameters.ci }}
+        vendor: ${{ parameters.vendor }}
+        irab: ${{ parameters.irab }}
+        project_contact: ${{ parameters.project_contact }}
+        env: ${{ parameters.env }}
+        region: ${{ parameters.region }}
+        listners: ${{ parameters.listners }}
+        allowed_principles: ${{ parameters.allowed_principles }}
+  - id: publish
+    name: PullRequest
+    action: publish:github:pull-request
+    input:
+      allowedHosts:
+        - github.com
+      title: test
+      description: test
+      repoUrl: github.com?owner=merck-gen&repo=endpt-srvc-poc
+      branchName: test-${{ parameters.ci }}
+      targetBranchName: main
+      targetPath: .
+

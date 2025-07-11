@@ -1,0 +1,28 @@
+name: CI pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      region:
+        description: 'region'
+        required: true
+        type: choice
+        options:
+          - 'us-east-1'
+          - 'us-east-2'
+          - 'ap-southeast-1'
+          - 'ap-northeast-1'
+          - 'eu-west-1'
+          - 'eu-central-1'
+      port:
+        description: 'Port'
+        required: true
+        type: number
+      application_ci:
+        description: 'Application CI'
+        required: true
+        type: string
+      vendor:
+        description: 'Vendor'
+        required: true
+        type: string
